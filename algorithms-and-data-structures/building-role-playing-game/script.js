@@ -67,5 +67,5 @@ function buyWeapon() {
 }
 
 function goTown() {
-
+    update(locations[0]);
 }
