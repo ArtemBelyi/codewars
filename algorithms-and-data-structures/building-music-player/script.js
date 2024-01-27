@@ -98,7 +98,7 @@ const playSong = (id) => {
     userData.currentSong = song;
     playButton.classList.add("playing");
 
-    audio.play();
+    audio.play().then();
 };
 
 const pauseSong = () => {
@@ -121,13 +121,33 @@ const playNextSong = () => {
 };
 
 const playPreviousSong = () => {
-    if (userData?.currentSong === null) return;
-    else {
+    if (userData?.currentSong !== null) {
         const currentSongIndex = getCurrentSongIndex();
         const previousSong = userData?.songs[currentSongIndex - 1];
 
         playSong(previousSong.id);
     }
+};
+
+const setPlayerDisplay = () => {
+    const playingSong = document.getElementById("player-song-title");
+    const songArtist = document.getElementById("player-song-artist");
+    const currentTitle = userData?.currentSong?.title;
+    const currentArtist = userData?.currentSong?.artist;
+
+    playingSong.textContent = currentTitle ? currentTitle : "";
+    songArtist.textContent = currentArtist ? currentArtist : "";
+};
+
+const shuffle = () => {
+    userData?.songs.sort(() => Math.random() - 0.5);
+    userData.currentSong = null;
+    userData.songCurrentTime = 0;
+
+    renderSongs(userData?.songs);
+    pauseSong();
+    setPlayerDisplay();
+    setPlayButtonAccessibleText();
 };
 
 const highlightCurrentSong = () => {
@@ -144,7 +164,7 @@ const highlightCurrentSong = () => {
 };
 
 const renderSongs = (array) => {
-    const songsHTML = array
+    playlistSongs.innerHTML = array
         .map((song)=> {
             return `
       <li id="song-${song.id}" class="playlist-song">
@@ -161,8 +181,15 @@ const renderSongs = (array) => {
       `;
         })
         .join("");
+};
 
-    playlistSongs.innerHTML = songsHTML;
+const setPlayButtonAccessibleText = () => {
+    const song = userData?.currentSong || userData?.songs[0];
+
+    playButton.setAttribute(
+        "aria-label",
+        song?.title ? `Play ${song.title}` : "Play"
+    );
 };
 
 const getCurrentSongIndex = () => userData?.songs.indexOf(userData.currentSong);
@@ -180,5 +207,7 @@ pauseButton.addEventListener("click",  pauseSong);
 nextButton.addEventListener("click", playNextSong);
 
 previousButton.addEventListener("click", playPreviousSong);
+
+shuffleButton.addEventListener("click", shuffle);
 
 renderSongs(userData?.songs);
