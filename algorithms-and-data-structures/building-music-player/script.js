@@ -98,6 +98,9 @@ const playSong = (id) => {
     userData.currentSong = song;
     playButton.classList.add("playing");
 
+    highlightCurrentSong();
+    setPlayerDisplay();
+    setPlayButtonAccessibleText();
     audio.play().then();
 };
 
@@ -200,7 +203,7 @@ const deleteSong = (id) => {
 
 const renderSongs = (array) => {
     playlistSongs.innerHTML = array
-        .map((song)=> {
+        .map((song) => {
             return `
       <li id="song-${song.id}" class="playlist-song">
       <button class="playlist-song-info" onclick="playSong(${song.id})">
@@ -245,4 +248,22 @@ previousButton.addEventListener("click", playPreviousSong);
 
 shuffleButton.addEventListener("click", shuffle);
 
+
+audio.addEventListener("ended", () => {
+    const currentSongIndex = getCurrentSongIndex();
+    const nextSongExists = userData?.songs[currentSongIndex + 1] !== undefined;
+
+    if (nextSongExists) {
+        playNextSong();
+    } else {
+        userData.currentSong = null;
+        userData.songCurrentTime = 0;
+        pauseSong();
+        setPlayerDisplay();
+        highlightCurrentSong();
+        setPlayButtonAccessibleText();
+    }
+});
+
 renderSongs(userData?.songs);
+setPlayButtonAccessibleText();
